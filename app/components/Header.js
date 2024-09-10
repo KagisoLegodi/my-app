@@ -5,7 +5,7 @@ export default function Header() {
     <header className="bg-blue-600 p-4 text-white">
       <nav className="container mx-auto flex justify-between">
         <Link href="/" className="text-xl font-bold">
-          420
+          Next E-Commerce
         </Link>
         <div className="space-x-4">
           <Link href="/wishlist">

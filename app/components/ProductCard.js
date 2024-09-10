@@ -27,8 +27,8 @@ export default function ProductCard({ product }) {
           />
         </div>
         <h2 className="text-lg font-semibold mb-1">{product.title}</h2>
-        <p className="text-xl font-bold text-gray-800">${product.price}</p>
-        <p className="text-sm text-gray-600 mt-1">{product.category}</p>
+        <p className="text-xl font-bold text-green-400">${product.price}</p>
+        <p className="text-sm text-gray-600 mt-1 bg-slate-100 ">{product.category}</p>
       </Link>
     </div>
   );

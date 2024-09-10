@@ -2,8 +2,8 @@ import './globals.css';
 import Header from '../app/components/header';
 
 export const metadata = {
-  title: 'FakeStore',
-  description: 'FakeStore - Best place to buy products online.',
+  title: 'NEXTY',
+  description: 'NEXTY - Best place to buy products online.',
 };
 
 export default function RootLayout({ children }) {
