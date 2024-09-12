@@ -96,7 +96,7 @@ export default async function ProductDetailPage({ params }) {
             <ul className="space-y-4">
               {product.reviews.map((review, index) => (
                 <li key={index} className="border-b pb-4">
-                  <p className="font-semibold">{review.name}</p>
+                  <p className="font-semibold">{review.reviewerName}</p>
                   <p className="text-sm text-gray-500">{new Date(review.date).toLocaleDateString()}</p>
                   <p className="mt-2">{review.comment}</p>
                   <p className="text-yellow-500 mt-1">Rating: {review.rating}/5</p>
