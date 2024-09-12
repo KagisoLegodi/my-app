@@ -1,7 +1,8 @@
+// pages/index.js
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import ProductList from "../app/components/ProductList";
+import { useState, useEffect } from "react";
+import ProductList from "./components/ProductList";
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -9,55 +10,63 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Function to fetch products
-  const fetchProducts = useCallback(async () => {
-    setLoading(true); // Start loading before fetch
-    setError(null); // Reset errors before fetching
+  const itemsPerPage = 20;
+
+  const fetchProducts = async (page) => {
+    setLoading(true);
+    setError(null);
 
     try {
       const res = await fetch(
-        `https://next-ecommerce-api.vercel.app/products?limit=20&offset=${
-          (page - 1) * 20
+        `https://next-ecommerce-api.vercel.app/products?limit=${itemsPerPage}&offset=${
+          (page - 1) * itemsPerPage
         }`
       );
-      if (!res.ok) throw new Error("Network response was not ok");
+      if (!res.ok) throw new Error("Failed to load products");
       const data = await res.json();
       setProducts(data);
-    } catch (error) {
-      setError("Failed to fetch products.");
-      console.error("Failed to fetch products:", error);
+    } catch (err) {
+      setError("Failed to fetch products");
     } finally {
-      setLoading(false); // Stop loading after fetch
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    fetchProducts(page);
   }, [page]);
 
-  // Fetch products when the page changes
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  // Update the URL with the current page
-  useEffect(() => {
-    window.history.replaceState({}, "", `?page=${page}`);
-  }, [page]);
-
-  // Handle page change events
   const handlePageChange = (direction) => {
-    if (direction === "next") {
-      setPage((prevPage) => prevPage + 1);
-    } else if (direction === "prev" && page > 1) {
-      setPage((prevPage) => prevPage - 1);
-    } else {
-      console.warn("Invalid direction or at the first page.");
-    }
+    if (direction === "next") setPage((prevPage) => prevPage + 1);
+    if (direction === "prev" && page > 1) setPage((prevPage) => prevPage - 1);
   };
 
   return (
     <section>
-      <h1 className="text-3xl font-bold">All Products</h1>
+      <h1 className="text-3xl font-bold my-4">All Products</h1>
       {loading && <p>Loading products...</p>}
       {error && <p className="text-red-500">{error}</p>}
-      <ProductList products={products} onPageChange={handlePageChange} />
+      {products.length > 0 ? (
+        <ProductList products={products} />
+      ) : (
+        <p>No products available.</p>
+      )}
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={() => handlePageChange("prev")}
+          disabled={page === 1}
+          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+        >
+          Previous
+        </button>
+        <span>Page {page}</span>
+        <button
+          onClick={() => handlePageChange("next")}
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Next
+        </button>
+      </div>
     </section>
   );
 }

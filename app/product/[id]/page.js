@@ -1,101 +1,109 @@
-"use client";
-
-// import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+'use client';
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
-export default function ProductDetailPage({ params }) {
+const ProductDetailPage = ({ params }) => {
   const { id: productId } = params;
+
   const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [imageError, setImageError] = useState(false);
+  const [mainImage, setMainImage] = useState("");
 
   useEffect(() => {
     const fetchProduct = async () => {
-      setLoading(true);
       try {
         const res = await fetch(
           `https://next-ecommerce-api.vercel.app/products/${productId}`
         );
         if (!res.ok) throw new Error("Network response was not ok");
-        const data = await res.json();
-        setProduct(data);
-      } catch (error) {
-        setError("Failed to load product details.");
-      } finally {
-        setLoading(false);
+        const productData = await res.json();
+        setProduct(productData);
+        setMainImage(productData.thumbnail); // Set the initial main image
+      } catch (err) {
+        setError("Failed to fetch product data.");
       }
     };
 
-    if (productId) {
-      fetchProduct();
-    }
+    fetchProduct();
   }, [productId]);
 
-  const getImageSrc = () => {
-    if (!product) return null;
-    if (!imageError && product.image?.startsWith("http")) return product.image;
-    if (
-      !imageError &&
-      product.images?.length > 0 &&
-      product.images[0]?.startsWith("http")
-    )
-      return product.images[0];
-    return null;
-  };
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
-  if (!product) return <p>Product not found.</p>;
+  if (error) {
+    return <p className="text-red-500 text-center mt-4">{error}</p>;
+  }
+  if (!product) {
+    return <p className="text-gray-500 text-center mt-4">Product not found.</p>;
+  }
 
   return (
-    <div className="mt-6 sm:mt-8 lg:flex lg:items-start lg:max-w-6xl xl:max-w-7xl">
-      <div className="mx-auto w-2/5 flex-none">
-        {imageError ? (
-          <p>Image failed to load.</p>
-        ) : (
-          <Image
-            src={getImageSrc() || "/fallback-image.jpg"} // Provide a fallback image
-            alt={product?.title || "Product image"}
-            width={500}
-            height={500}
-            className="w-[90%] h-[90%] object-contain"
-            onError={() => setImageError(true)}
-          />
-        )}
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      {/* Main Product Image */}
+      <div className="mb-6">
+        <Image
+          src={mainImage}
+          alt={product.title}
+          width={320}
+          height={320}
+          className="object-contain rounded-lg shadow-lg"
+          priority // Add the priority prop
+        />
       </div>
-      <div className="mx-auto w-[90%] space-y-2">
-        <h1 className="text-2xl md:text-4xl lg:text-4xl font-bold">
-          {product?.title}
-        </h1>
-        {product?.rating && (
-          <div className="flex gap-2 items-center">
-            <svg
-              className="w-4 h-4 text-yellow-300"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 22 20"
-            >
-              <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-            </svg>
-            <div>{product.rating.rate}</div>
-            <div>Reviews: {product.rating.count}</div>
+
+      {/* Product Images Gallery */}
+      {product.images && product.images.length > 0 && (
+        <div className="mt-8">
+          <div className="flex flex-wrap gap-6">
+            {product.images.map((img, index) => (
+              <div
+                key={index}
+                className="grid sm:w-1/2 lg:w-1/3 cursor-pointer"
+                onClick={() => setMainImage(img)}
+              >
+                <Image
+                  src={img}
+                  alt={`Product image ${index + 1}`}
+                  width={100}
+                  height={100}
+                  className="object-contain rounded-lg shadow-md"
+                />
+              </div>
+            ))}
           </div>
-        )}
-        <span className="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
-          {product?.category}
-        </span>
-        <h3 className="text-xl md:text-2xl lg:text-2xl font-bold">
-          ${product?.price}
-        </h3>
-        <button className="bg-cyan-700 hover:bg-cyan-900 w-[90%] md:w-[14rem] lg:w-[14rem] text-white font-bold py-2 px-4 rounded">
-          Add To Cart
-        </button>
-        <h2 className="text-lg font-bold">Description</h2>
-        <p>{product?.description}</p>
+        </div>
+      )}
+
+      {/* Product Details */}
+      <div className="space-y-4">
+        <p className="text-lg leading-relaxed">
+          <span className="font-semibold bg-slate-400  ">{product.title}:</span>
+          {product.description}
+        </p>
+        <p className="text-lg leading-relaxed">
+          <span className="font-semibold bg-slate-400   ">Category:</span> {product.category}
+        </p>
+        <p className="text-lg leading-relaxed">
+          <span className="font-semibold bg-slate-400  ">Price:</span> $
+          {product.price.toFixed(2)}
+        </p>
+        <p className="text-lg leading-relaxed">
+          <span className="font-semibold bg-slate-400  ">Discount:</span>{" "}
+          {product.discountPercentage}%
+        </p>
+        <p className="text-lg leading-relaxed">
+          <span className="font-semibold bg-slate-400  ">Rating:</span> {product.rating}
+        </p>
+        <p className="text-lg leading-relaxed">
+          <span className="font-semibold bg-slate-400  ">Stock:</span> {product.stock} items
+          available
+        </p>
+        <p className="text-lg leading-relaxed">
+          <span className="font-semibold bg-slate-400   ">SKU:</span> {product.sku}
+        </p>
+        <p className="text-lg leading-relaxed">
+          <span className="font-semibold bg-slate-400  ">Tags:</span> {product.tags.join(", ")}
+        </p>
       </div>
     </div>
   );
-}
+};
+
+export default ProductDetailPage;

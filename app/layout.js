@@ -1,5 +1,5 @@
 import './globals.css';
-import Header from '../app/components/header';
+import Header from './components/Header';
 
 export const metadata = {
   title: 'NEXTY',
