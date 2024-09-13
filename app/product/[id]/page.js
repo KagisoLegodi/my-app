@@ -63,7 +63,7 @@ const ProductDetailPage = ({ params }) => {
           className="object-contain rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700"
           priority
         />
-        <h1 className="text-2xl font-semibold mt-2">{product.title}</h1>
+        <h1 className="text-2xl font-semibold mt-2 underline">{product.title}</h1>
       </div>
 
       {/* Product Images Gallery */}
